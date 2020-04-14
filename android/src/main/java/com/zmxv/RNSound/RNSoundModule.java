@@ -2,6 +2,7 @@ package com.zmxv.RNSound;
 
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
+import android.media.AudioAttributes;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
@@ -24,6 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.io.IOException;
 
+import android.util.AttributeSet;
 import android.util.Log;
 
 public class RNSoundModule extends ReactContextBaseJavaModule implements AudioManager.OnAudioFocusChangeListener {
@@ -95,7 +97,12 @@ public class RNSoundModule extends ReactContextBaseJavaModule implements AudioMa
           Log.e("RNSoundModule", String.format("Unrecognised category %s", module.category));
           break;
       }
-      if (category != null) {
+
+      if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+        AudioAttributes.Builder attrBuilder = new AudioAttributes.Builder();
+        attrBuilder.setLegacyStreamType(category);
+        player.setAudioAttributes(attrBuilder.build());
+      } else if (category != null) {
         player.setAudioStreamType(category);
       }
     }
@@ -169,8 +176,8 @@ public class RNSoundModule extends ReactContextBaseJavaModule implements AudioMa
     }
 
     if (fileName.startsWith("http://") || fileName.startsWith("https://")) {
-      mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-      Log.e("RNSoundModule", fileName);
+//      mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+      Log.i("RNSoundModule", fileName);
       try {
         mediaPlayer.setDataSource(fileName);
       } catch(IOException e) {
@@ -194,8 +201,8 @@ public class RNSoundModule extends ReactContextBaseJavaModule implements AudioMa
 
     File file = new File(fileName);
     if (file.exists()) {
-      mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-      Log.e("RNSoundModule", fileName);
+//      mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+      Log.i("RNSoundModule", fileName);
       try {
           mediaPlayer.setDataSource(fileName);
       } catch(IOException e) {
@@ -409,7 +416,7 @@ public class RNSoundModule extends ReactContextBaseJavaModule implements AudioMa
   public void setSpeakerphoneOn(final Double key, final Boolean speaker) {
     MediaPlayer player = this.playerPool.get(key);
     if (player != null) {
-      player.setAudioStreamType(AudioManager.STREAM_MUSIC);
+//      player.setAudioStreamType(AudioManager.STREAM_MUSIC);
       AudioManager audioManager = (AudioManager)this.context.getSystemService(this.context.AUDIO_SERVICE);
       if(speaker){
         audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
